@@ -10,7 +10,7 @@ interface TransferModalProps {
 }
 
 export const TransferModal: React.FC<TransferModalProps> = ({ openModal, setModalState }) => {
-  const { activeAddress, activeAccount, signTransactions } = useWallet()
+  const { activeAddress, transactionSigner } = useWallet()
   const [recipientAddress, setRecipientAddress] = useState('')
   const [tokenId, setTokenId] = useState(1)
   const [isOwner, setIsOwner] = useState(false)
@@ -39,7 +39,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({ openModal, setModa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!activeAccount || !signTransactions) {
+    if (!transactionSigner || !activeAddress) {
       toast.error('Wallet not connected')
       return
     }
@@ -59,7 +59,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({ openModal, setModa
     try {
       const signer = {
         addr: activeAddress,
-        signer: activeAccount.signer,
+        signer: transactionSigner,
       }
 
       await transferNFT(signer, recipientAddress.trim(), tokenId)

@@ -10,7 +10,7 @@ interface MintModalProps {
 }
 
 export const MintModal: React.FC<MintModalProps> = ({ openModal, setModalState }) => {
-  const { activeAddress, activeAccount, signTransactions } = useWallet()
+  const { activeAddress, transactionSigner } = useWallet()
   const [recipientAddress, setRecipientAddress] = useState('')
   const [metadata, setMetadata] = useState('')
   const [isMinterAccount, setIsMinterAccount] = useState(false)
@@ -45,7 +45,7 @@ export const MintModal: React.FC<MintModalProps> = ({ openModal, setModalState }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!activeAccount || !signTransactions) {
+    if (!transactionSigner || !activeAddress) {
       toast.error('Wallet not connected')
       return
     }
@@ -65,14 +65,14 @@ export const MintModal: React.FC<MintModalProps> = ({ openModal, setModalState }
     try {
       const signer = {
         addr: activeAddress,
-        signer: activeAccount.signer,
+        signer: transactionSigner,
       }
 
       await mintNFT(signer, recipientAddress.trim(), metadata.trim())
 
       // Reset form and close modal
       setMetadata('')
-      setRecipientAddress(activeAddress)
+      setRecipientAddress(activeAddress || '')
       setModalState(false)
 
       // Refresh the page to show the new NFT

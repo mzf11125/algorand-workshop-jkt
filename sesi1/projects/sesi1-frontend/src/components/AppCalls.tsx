@@ -1,7 +1,7 @@
 import { useWallet } from '@txnlab/use-wallet-react'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
-import { SimpleNftFactory } from '../contracts/SimpleNFT'
+import { SesiFactory } from '../contracts/Sesi'
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app'
 import { getAlgodConfigFromViteEnvironment, getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
@@ -33,7 +33,7 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
     // Instead, you would deploy your contract on your backend and reference it by id.
     // Given the simplicity of the starter contract, we are deploying it on the frontend
     // for demonstration purposes.
-    const factory = new SimpleNftFactory({
+    const factory = new SesiFactory({
       defaultSender: activeAddress ?? undefined,
       algorand,
     })
@@ -41,15 +41,6 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
       .deploy({
         onSchemaBreak: OnSchemaBreak.AppendApp,
         onUpdate: OnUpdate.AppendApp,
-        createParams: {
-          method: 'initialize',
-          args: {
-            name: contractInput,
-            symbol: "NFT",
-            uri: contractInput,
-            minter: activeAddress!
-          }
-        }
       })
       .catch((e: Error) => {
         enqueueSnackbar(`Error deploying the contract: ${e.message}`, { variant: 'error' })
@@ -63,25 +54,28 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
 
     const { appClient } = deployResult
 
-    try {
-      // The initialize method is called during deploy via createParams
-      // Since we already deployed with initialize parameters, we can just show success
-      enqueueSnackbar(`SimpleNFT contract initialized successfully!`, { variant: 'success' })
-    } catch (e: any) {
-      enqueueSnackbar(`Error initializing contract: ${e.message}`, { variant: 'error' })
-    } finally {
+    const response = await appClient.send.hello({ args: { name: contractInput } }).catch((e: Error) => {
+      enqueueSnackbar(`Error calling the contract: ${e.message}`, { variant: 'error' })
       setLoading(false)
+      return undefined
+    })
+
+    if (!response) {
+      return
     }
+
+    enqueueSnackbar(`Response from the contract: ${response.return}`, { variant: 'success' })
+    setLoading(false)
   }
 
   return (
     <dialog id="appcalls_modal" className={`modal ${openModal ? 'modal-open' : ''} bg-slate-200`}>
       <form method="dialog" className="modal-box">
-        <h3 className="font-bold text-lg">Initialize your SimpleNFT smart contract</h3>
+        <h3 className="font-bold text-lg">Say hello to your Algorand smart contract</h3>
         <br />
         <input
           type="text"
-          placeholder="Provide NFT name"
+          placeholder="Provide input to hello function"
           className="input input-bordered w-full"
           value={contractInput}
           onChange={(e) => {

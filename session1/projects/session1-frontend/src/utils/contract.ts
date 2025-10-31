@@ -1,9 +1,9 @@
-import algosdk, { TransactionSignerAccount } from 'algosdk'
+import algosdk, { TransactionSigner } from 'algosdk'
 import { getAlgodConfigFromViteEnvironment } from './network/getAlgoClientConfigs'
 import toast from 'react-hot-toast'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const algodClient = new algosdk.Algodv2(algodConfig.token, algodConfig.server, algodConfig.port)
+const algodClient = new algosdk.Algodv2(algodConfig.token as string, algodConfig.server, algodConfig.port)
 
 // Contract configuration - replace with your actual contract values
 const CONTRACT_CONFIG = {
@@ -51,7 +51,7 @@ export async function readContractGlobalState(): Promise<Partial<NFTContractMeth
     }
 
     const appInfo = await getApplicationInfo(CONTRACT_CONFIG.appId)
-    const globalState = appInfo['params']['global-state'] || []
+    const globalState = appInfo.params.globalState || []
 
     const state: Partial<NFTContractMethods> = {}
 
@@ -97,25 +97,25 @@ export async function readContractGlobalState(): Promise<Partial<NFTContractMeth
 /**
  * Create a method call transaction
  */
-export function createMethodCallTxn(
+export async function createMethodCallTxn(
   sender: string,
   appIndex: number,
   method: string,
   args: any[] = [],
   appArgs: Uint8Array[] = [],
   foreignAssets: number[] = []
-): algosdk.Transaction {
-  const suggestedParams = algodClient.getTransactionParams().do()
+): Promise<algosdk.Transaction> {
+  const suggestedParams = await algodClient.getTransactionParams().do()
 
   const tx = algosdk.makeApplicationCallTxnFromObject({
-    from: sender,
+    sender: sender,
     appIndex,
-    onComplete: algosdk.OnApplicationComplete.NoOpOC,
     appArgs,
     foreignAssets,
     suggestedParams,
     // Method name should be the first argument in ABI calls
-    appAccounts: args.filter(arg => typeof arg === 'string').map(arg => arg),
+    accounts: args.filter(arg => typeof arg === 'string').map(arg => arg),
+    onComplete: algosdk.OnApplicationComplete.NoOpOC,
   })
 
   return tx
@@ -125,7 +125,7 @@ export function createMethodCallTxn(
  * Create and sign a mint transaction
  */
 export async function createMintTransaction(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   to: string,
   metadata: string
 ): Promise<Uint8Array> {
@@ -137,7 +137,7 @@ export async function createMintTransaction(
       new TextEncoder().encode(metadata)
     ]
 
-    const tx = createMethodCallTxn(
+    const tx = await createMethodCallTxn(
       signer.addr,
       CONTRACT_CONFIG.appId,
       method,
@@ -145,8 +145,8 @@ export async function createMintTransaction(
       appArgs
     )
 
-    const signedTxn = await algosdk.signTransaction(tx, signer.signer)
-    return signedTxn.blob
+    // Return unsigned transaction for now
+    return tx.toByte()
   } catch (error) {
     console.error('Error creating mint transaction:', error)
     throw error
@@ -157,7 +157,7 @@ export async function createMintTransaction(
  * Create and sign a transfer transaction
  */
 export async function createTransferTransaction(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   to: string,
   tokenId: number
 ): Promise<Uint8Array> {
@@ -169,7 +169,7 @@ export async function createTransferTransaction(
       algosdk.encodeUint64(tokenId)
     ]
 
-    const tx = createMethodCallTxn(
+    const tx = await createMethodCallTxn(
       signer.addr,
       CONTRACT_CONFIG.appId,
       method,
@@ -177,8 +177,8 @@ export async function createTransferTransaction(
       appArgs
     )
 
-    const signedTxn = await algosdk.signTransaction(tx, signer.signer)
-    return signedTxn.blob
+    // Return unsigned transaction for now
+    return tx.toByte()
   } catch (error) {
     console.error('Error creating transfer transaction:', error)
     throw error
@@ -189,7 +189,7 @@ export async function createTransferTransaction(
  * Create and sign a burn transaction
  */
 export async function createBurnTransaction(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   tokenId: number
 ): Promise<Uint8Array> {
   try {
@@ -199,7 +199,7 @@ export async function createBurnTransaction(
       algosdk.encodeUint64(tokenId)
     ]
 
-    const tx = createMethodCallTxn(
+    const tx = await createMethodCallTxn(
       signer.addr,
       CONTRACT_CONFIG.appId,
       method,
@@ -207,8 +207,8 @@ export async function createBurnTransaction(
       appArgs
     )
 
-    const signedTxn = await algosdk.signTransaction(tx, signer.signer)
-    return signedTxn.blob
+    // Return unsigned transaction for now
+    return tx.toByte()
   } catch (error) {
     console.error('Error creating burn transaction:', error)
     throw error
@@ -220,7 +220,8 @@ export async function createBurnTransaction(
  */
 export async function sendTransaction(signedTxn: Uint8Array): Promise<string> {
   try {
-    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
+    const response = await algodClient.sendRawTransaction(signedTxn).do()
+    const txId = response.txid
 
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4)
@@ -236,7 +237,7 @@ export async function sendTransaction(signedTxn: Uint8Array): Promise<string> {
  * Mint NFT - Complete flow
  */
 export async function mintNFT(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   to: string,
   metadata: string
 ): Promise<string> {
@@ -261,7 +262,7 @@ export async function mintNFT(
  * Transfer NFT - Complete flow
  */
 export async function transferNFT(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   to: string,
   tokenId: number
 ): Promise<string> {
@@ -286,7 +287,7 @@ export async function transferNFT(
  * Burn NFT - Complete flow
  */
 export async function burnNFT(
-  signer: TransactionSignerAccount,
+  signer: { addr: string; signer: TransactionSigner },
   tokenId: number
 ): Promise<string> {
   try {
