@@ -7,21 +7,30 @@ logger = logging.getLogger(__name__)
 
 # define deployment behaviour based on supplied app spec
 def deploy() -> None:
-    from smart_contracts.artifacts.session.session_client import (
-        HelloArgs,
-        SessionFactory,
+    from smart_contracts.artifacts.session.simple_nft_client import (
+        SimpleNftFactory,
+        InitializeArgs,
+        SimpleNftMethodCallCreateParams,
     )
 
     algorand = algokit_utils.AlgorandClient.from_environment()
     deployer_ = algorand.account.from_environment("DEPLOYER")
 
     factory = algorand.client.get_typed_app_factory(
-        SessionFactory, default_sender=deployer_.address
+        SimpleNftFactory, default_sender=deployer_.address
     )
 
     app_client, result = factory.deploy(
         on_update=algokit_utils.OnUpdate.AppendApp,
         on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
+        create_params=SimpleNftMethodCallCreateParams(
+            args=InitializeArgs(
+                name="Workshop NFT",
+                symbol="WSNFT",
+                uri="https://example.com/nft/metadata.json",
+                minter=deployer_.address
+            )
+        )
     )
 
     if result.operation_performed in [
@@ -35,10 +44,7 @@ def deploy() -> None:
                 receiver=app_client.app_address,
             )
         )
-
-    name = "world"
-    response = app_client.send.hello(args=HelloArgs(name=name))
     logger.info(
-        f"Called hello on {app_client.app_name} ({app_client.app_id}) "
-        f"with name={name}, received: {response.abi_return}"
+        f"Deployed NFT contract {app_client.app_name} ({app_client.app_id}) "
+        f"with operation: {result.operation_performed}"
     )
