@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
-import { Wallet, Image, Plus, Send, Trash2, Copy, Check } from 'lucide-react'
+import { Wallet, Image, Plus, Send, Trash2, Copy, Check, LogOut } from 'lucide-react'
 import ConnectWallet from './components/ConnectWallet'
 import { NFTCard } from './components/NFTCard'
 import { MintModal } from './components/MintModal'
@@ -17,10 +17,22 @@ const Home: React.FC<HomeProps> = () => {
   const [burnModal, setBurnModal] = useState<boolean>(false)
   const [copied, setCopied] = useState<boolean>(false)
 
-  const { activeAddress, activeAccount } = useWallet()
+  const { activeAddress, activeAccount, wallets } = useWallet()
 
   const toggleWalletModal = () => {
     setOpenWalletModal(!openWalletModal)
+  }
+
+  const handleDisconnect = async () => {
+    if (wallets) {
+      const activeWallet = wallets.find((w) => w.isActive)
+      if (activeWallet) {
+        await activeWallet.disconnect()
+      } else {
+        localStorage.removeItem('@txnlab/use-wallet:v3')
+        window.location.reload()
+      }
+    }
   }
 
   const copyAddress = () => {
@@ -67,12 +79,20 @@ const Home: React.FC<HomeProps> = () => {
                     <button
                       onClick={copyAddress}
                       className="p-1 hover:bg-gray-200 rounded transition-colors"
+                      title="Copy address"
                     >
                       {copied ? (
                         <Check className="w-4 h-4 text-green-600" />
                       ) : (
                         <Copy className="w-4 h-4 text-gray-600" />
                       )}
+                    </button>
+                    <button
+                      onClick={handleDisconnect}
+                      className="p-1 hover:bg-red-100 rounded transition-colors"
+                      title="Disconnect wallet"
+                    >
+                      <LogOut className="w-4 h-4 text-red-600" />
                     </button>
                   </div>
                 ) : (

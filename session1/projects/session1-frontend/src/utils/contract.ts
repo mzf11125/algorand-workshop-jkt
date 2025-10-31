@@ -7,14 +7,14 @@ const algodClient = new algosdk.Algodv2(algodConfig.token as string, algodConfig
 
 // Contract configuration - replace with your actual contract values
 const CONTRACT_CONFIG = {
-  appId: 0, // Replace with your actual app ID
-  appAddress: '', // Replace with your actual app address
+  appId: 748924332, // Application ID from deployed contract
+  appAddress: 'JAQW3NJQA4AYUITMUPEBXKN6OTASROV3BZ3DIA453MLTHBH3YK3ATVEBQQ', // Contract application address
   approvalProgram: '', // Replace with your actual approval program
   clearProgram: '', // Replace with your actual clear program
-  globalInts: 7,
-  globalBytes: 5,
-  localInts: 0,
-  localBytes: 0
+  globalInts: 3, // Global State Uint from contract info
+  globalBytes: 5, // Global State Byte from contract info
+  localInts: 0, // Local State Uint from contract info
+  localBytes: 0 // Local State Byte from contract info
 }
 
 export interface NFTContractMethods {
