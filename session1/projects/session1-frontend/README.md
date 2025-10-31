@@ -1,76 +1,225 @@
-# session1-frontend
+# Simple NFT Marketplace Frontend
 
-This starter React project has been generated using AlgoKit. See below for default getting started instructions.
+A modern, responsive frontend for the Simple NFT smart contract on Algorand. Built with React, TypeScript, and Tailwind CSS.
 
-# Setup
+## Features
 
-### Initial Setup
+- ✅ **Wallet Integration** - Connect with Pera, Defly, Exodus, and KMD wallets
+- ✅ **NFT Minting** - Mint new NFTs (minter only)
+- ✅ **NFT Transfers** - Transfer NFTs between accounts
+- ✅ **NFT Burning** - Burn/destroy NFTs (owner only)
+- ✅ **Modern UI** - Clean, responsive design with Tailwind CSS
+- ✅ **Real-time Updates** - Live NFT data fetching from smart contract
+- ✅ **Transaction Notifications** - Toast notifications for all actions
+- ✅ **Network Support** - Works on TestNet, MainNet, and LocalNet
 
-#### 1. Clone the Repository
-Start by cloning this repository to your local machine.
+## Smart Contract Functions
 
-#### 2. Install Pre-requisites
-Ensure the following pre-requisites are installed and properly configured:
+The frontend integrates with the following smart contract methods:
 
-- **npm**: Node package manager. Install from [Node.js Installation Guide](https://nodejs.org/en/download/). Verify with `npm -v` to see version `18.12`+.
-- **AlgoKit CLI**: Essential for project setup and operations. Install the latest version from [AlgoKit CLI Installation Guide](https://github.com/algorandfoundation/algokit-cli#install). Verify installation with `algokit --version`, expecting `2.0.0` or later.
+- `initialize(name, symbol, uri, minter)` - Initialize the contract
+- `mint(to, metadata)` - Mint a new NFT
+- `burn(token_id)` - Burn/destroy an NFT
+- `transfer(to, token_id)` - Transfer NFT to another account
+- `balance_of(account)` - Check NFT balance of an account
+- `owner_of(token_id)` - Get the owner of an NFT
+- `get_name()`, `get_symbol()`, `get_uri()` - Get contract metadata
+- `get_total_supply()` - Get total NFT supply
 
-#### 3. Bootstrap Your Local Environment
-Run the following commands within the project folder:
+## Prerequisites
 
-- **Install Project Dependencies**: With `algokit project bootstrap all`, ensure all dependencies are ready.
+- Node.js 18+ and pnpm
+- Algorand wallet (Pera, Defly, or Exodus)
+- Deployed SimpleNFT smart contract
+- ALGO tokens for transaction fees
 
-### Development Workflow
+## Quick Start
 
-#### Terminal
-Directly manage and interact with your project using AlgoKit commands:
+1. **Clone and Setup**
+   ```bash
+   git clone <repository-url>
+   cd session1-frontend
+   pnpm install
+   ```
 
-1. **Build Contracts**: `algokit project run build` builds react web app and links with smart contracts in workspace, if any.
-2. Remaining set of command for linting, testing and deployment can be found in respective [package.json](./package.json) file and [.algokit.toml](./.algokit.toml) files.
+2. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   ```
 
-#### VS Code
-For a seamless experience with breakpoint debugging and other features:
+   Edit `.env` and update:
+   - `VITE_CONTRACT_APP_ID` - Your deployed contract app ID
+   - `VITE_CONTRACT_APP_ADDRESS` - Your contract address
+   - Network settings for TestNet/MainNet/LocalNet
 
-1. **Open Project**: In VS Code, open the repository root.
-2. **Install Extensions**: Follow prompts to install recommended extensions.
-3. **Debugging**:
-   - Use `F5` to start debugging.
-   - **Windows Users**: Select the Python interpreter at `./.venv/Scripts/python.exe` via `Ctrl/Cmd + Shift + P` > `Python: Select Interpreter` before the first run.
+3. **Start Development Server**
+   ```bash
+   pnpm dev
+   ```
 
-#### Other IDEs
-While primarily optimized for VS Code, Jetbrains WebStorm has base support for this project:
+   The app will be available at `http://localhost:5173`
 
-1. **Open Project**: In your JetBrains IDE, open the repository root.
-2. **Automatic Setup**: The IDE should configure the Python interpreter and virtual environment.
-3. **Debugging**: Use `Shift+F10` or `Ctrl+R` to start debugging. Note: Windows users may encounter issues with pre-launch tasks due to a known bug. See [JetBrains forums](https://youtrack.jetbrains.com/issue/IDEA-277486/Shell-script-configuration-cannot-run-as-before-launch-task) for workarounds.
+## Configuration
 
-## AlgoKit Workspaces and Project Management
-This project supports both standalone and monorepo setups through AlgoKit workspaces. Leverage [`algokit project run`](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/project/run.md) commands for efficient monorepo project orchestration and management across multiple projects within a workspace.
+### Environment Variables
 
-> Please note, by default frontend is pre configured to run against Algorand LocalNet. If you want to run against TestNet or MainNet, comment out the current environment variable and uncomment the relevant one in [`.env`](.env) file that is created after running bootstrap command and based on [`.env.template`](.env.template).
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_CONTRACT_APP_ID` | Your smart contract application ID | `123456789` |
+| `VITE_CONTRACT_APP_ADDRESS` | Your contract address | `""` |
+| `VITE_ALGOD_NETWORK` | Network to use (`testnet`/`mainnet`/`localnet`) | `testnet` |
 
-# Algorand Wallet integrations
+### Wallet Setup
 
-The template comes with [`use-wallet`](https://github.com/txnlab/use-wallet) integration, which provides a React hook for connecting to an Algorand wallet providers. The following wallet providers are included by default:
-- LocalNet:
-- - [KMD/Local Wallet](https://github.com/TxnLab/use-wallet#kmd-algorand-key-management-daemon) - Algorand's Key Management Daemon (KMD) is a service that manages Algorand private keys and signs transactions. Works best with AlgoKit LocalNet and allows you to easily test and interact with your dApps locally.
-- TestNet and others:
-- - [Pera Wallet](https://perawallet.app).
-- - [Defly Wallet](https://defly.app).
-- - [Exodus Wallet](https://www.exodus.com).
-- - [Daffi Wallet](https://www.daffi.me).
+1. **Install Wallet App**
+   - Pera Wallet: https://perawallet.app/
+   - Defly Wallet: https://defly.app/
+   - Exodus: https://www.exodus.com/
 
-Refer to official [`use-wallet`](https://github.com/txnlab/use-wallet) documentation for detailed guidelines on how to integrate with other wallet providers (such as WalletConnect v2). Too see implementation details on the use wallet hook and initialization of extra wallet providers refer to [`App.tsx`](./src/App.tsx).
+2. **Fund Your Wallet**
+   - Get TestNet ALGO from the [Algorand faucet](https://bank.testnet.algorand.network/)
+   - Minimum balance: 0.1 ALGO + transaction fees
 
-# Tools
+3. **Connect to Marketplace**
+   - Click "Connect Wallet" in the app
+   - Select your preferred wallet
+   - Approve the connection request
 
-This project makes use of React and Tailwind to provider a base project configuration to develop frontends for your Algorand dApps and interactions with smart contracts. The following tools are in use:
+## Smart Contract Deployment
 
-- [AlgoKit Utils](https://github.com/algorandfoundation/algokit-utils-ts) - Various TypeScript utilities to simplify interactions with Algorand and AlgoKit.
-- [React](https://reactjs.org/) - A JavaScript library for building user interfaces.
-- [use-wallet](https://github.com/txnlab/use-wallet) - A React hook for connecting to an Algorand wallet providers.
-- [npm](https://www.npmjs.com/): Node.js package manager
-It has also been configured to have a productive dev experience out of the box in [VS Code](https://code.visualstudio.com/), see the [.vscode](./.vscode) folder.
-# Integrating with smart contracts and application clients
+Before using the frontend, deploy your smart contract:
 
-Refer to the detailed guidance on [integrating with smart contracts and application clients](./src/contracts/README.md). In essence, for any smart contract codebase generated with AlgoKit or other tools that produce compile contracts into ARC34 compliant app specifications, you can use the `algokit generate` command to generate TypeScript or Python typed client. Once generated simply drag and drop the generated client into `./src/contracts` and import it into your React components as you see fit.
+1. **Deploy Contract**
+   ```bash
+   # Navigate to contracts directory
+   cd ../session1-contracts
+
+   # Deploy using AlgoKit
+   algokit deploy session1
+   ```
+
+2. **Update Frontend Config**
+   - Copy the deployed app ID and address
+   - Update `.env` with your contract details
+   - Restart the development server
+
+## Usage Guide
+
+### For Minters
+
+1. Connect your wallet (must be the designated minter)
+2. Click "Mint NFT" in the sidebar
+3. Enter recipient address (defaults to your address)
+4. Add NFT metadata/description
+5. Confirm and approve the transaction
+
+### For NFT Owners
+
+1. **Transfer NFT**
+   - Click "Transfer NFT"
+   - Enter recipient address
+   - Confirm the transfer
+
+2. **Burn NFT**
+   - Click "Burn NFT" (permanent action)
+   - Type "BURN" to confirm
+   - Approve the burning transaction
+
+### For Viewers
+
+- View NFT details without connecting wallet
+- See current owner and metadata
+- Check contract information
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── ConnectWallet.tsx
+│   ├── NFTCard.tsx
+│   ├── MintModal.tsx
+│   ├── TransferModal.tsx
+│   └── BurnModal.tsx
+├── constants/          # Configuration constants
+│   ├── contract.ts
+│   └── wallet.ts
+├── utils/              # Utility functions
+│   ├── contract.ts     # Contract interaction utilities
+│   └── network/        # Network configuration
+└── styles/             # CSS and styling
+```
+
+## Development
+
+### Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm preview` - Preview production build
+- `pnpm generate:app-clients` - Generate contract clients
+
+### Code Style
+
+- TypeScript for type safety
+- Tailwind CSS for styling
+- React functional components with hooks
+- Lucide React for icons
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect repository to Vercel
+3. Set environment variables in Vercel dashboard
+4. Deploy automatically on push
+
+### Other Platforms
+
+1. Build the project: `pnpm build`
+2. Deploy the `dist` folder to your hosting platform
+3. Configure environment variables
+4. Ensure HTTPS is enabled (required for wallet connections)
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Wallet not connected"**
+   - Install and unlock your wallet app
+   - Ensure wallet is on the correct network (TestNet/MainNet)
+   - Try reconnecting in the app
+
+2. **"Transaction failed"**
+   - Check your ALGO balance (minimum 0.1 ALGO)
+   - Verify contract address is correct
+   - Check network connectivity
+
+3. **"Contract not found"**
+   - Update `VITE_CONTRACT_APP_ID` in `.env`
+   - Ensure contract is deployed on the correct network
+   - Restart the development server
+
+### Getting Help
+
+- Check the browser console for detailed error messages
+- Verify environment variables are correctly set
+- Ensure smart contract is deployed and accessible
+- Join the Algorand Discord for community support
+
+## Security Notes
+
+- Never share your private keys or mnemonic phrases
+- Always verify transaction details before approving
+- Use TestNet for development and testing
+- Keep your wallet app updated to the latest version
+- Be cautious of phishing attempts and fake websites
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

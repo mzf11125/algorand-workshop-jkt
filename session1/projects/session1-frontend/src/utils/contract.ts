@@ -1,4 +1,4 @@
-import { TransactionSignerAccount, algosdk } from 'algosdk'
+import algosdk, { TransactionSignerAccount } from 'algosdk'
 import { getAlgodConfigFromViteEnvironment } from './network/getAlgoClientConfigs'
 import toast from 'react-hot-toast'
 

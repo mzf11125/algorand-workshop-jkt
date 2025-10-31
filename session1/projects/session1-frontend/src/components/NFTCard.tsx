@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { Image, ExternalLink, Clock, User, Tag } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { readContractGlobalState, isNFTOwner } from '../utils/contract'
+import { DEFAULT_NFT_METADATA } from '../constants/contract'
 
 interface NFTData {
   tokenId: number
@@ -11,6 +13,7 @@ interface NFTData {
   owner: string
   totalSupply: number
   metadata?: string
+  isOwner?: boolean
 }
 
 export const NFTCard: React.FC = () => {
@@ -27,32 +30,31 @@ export const NFTCard: React.FC = () => {
       setError(null)
 
       try {
-        // Mock NFT data for now - replace with actual contract calls
-        // This would involve calling the smart contract methods like:
-        // - get_name()
-        // - get_symbol()
-        // - get_uri(tokenId)
-        // - owner_of(tokenId)
-        // - get_total_supply()
+        // Fetch contract state
+        const contractState = await readContractGlobalState()
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Check if user owns the NFT
+        const isOwnerStatus = await isNFTOwner(activeAddress)
 
-        // Mock data - replace with actual contract interaction
-        const mockNFT: NFTData = {
-          tokenId: 1,
-          name: "SimpleNFT",
-          symbol: "SNFT",
-          uri: "https://example.com/metadata.json",
-          owner: activeAddress,
-          totalSupply: 1,
-          metadata: "This is a beautiful NFT minted on Algorand"
+        if (contractState.totalSupply && contractState.totalSupply > 0) {
+          const nftInfo: NFTData = {
+            tokenId: contractState.currentTokenId || 1,
+            name: contractState.name || DEFAULT_NFT_METADATA.name,
+            symbol: contractState.symbol || DEFAULT_NFT_METADATA.symbol,
+            uri: contractState.uri || DEFAULT_NFT_METADATA.image,
+            owner: contractState.currentOwner || '',
+            totalSupply: contractState.totalSupply,
+            metadata: DEFAULT_NFT_METADATA.description,
+            isOwner: isOwnerStatus
+          }
+
+          setNftData(nftInfo)
+        } else {
+          setNftData(null)
         }
-
-        setNftData(mockNFT)
       } catch (err) {
         console.error('Error fetching NFT data:', err)
-        setError('Failed to load NFT data')
+        setError('Failed to load NFT data. Make sure the contract is deployed and configured.')
         toast.error('Failed to load NFT data')
       } finally {
         setLoading(false)

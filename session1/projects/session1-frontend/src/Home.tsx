@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { Wallet, Image, Plus, Send, Trash2, Copy, Check } from 'lucide-react'
-import { ConnectWallet } from './ConnectWallet'
-import { NFTCard } from './NFTCard'
-import { MintModal } from './MintModal'
-import { TransferModal } from './TransferModal'
-import { BurnModal } from './BurnModal'
+import ConnectWallet from './components/ConnectWallet'
+import { NFTCard } from './components/NFTCard'
+import { MintModal } from './components/MintModal'
+import { TransferModal } from './components/TransferModal'
+import { BurnModal } from './components/BurnModal'
 import toast from 'react-hot-toast'
 
 interface HomeProps {}
